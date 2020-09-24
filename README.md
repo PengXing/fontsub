@@ -1,13 +1,8 @@
-# fontsubset
+# fontsub
 
 为什么要写这个，主要出发点是阅文文字内容的反盗版，能一定程度上提高黑产的盗版成本。目前大部分的反盗版的方式是将内容转成图片，但是这个可维护性不太好，比如富文本，或者文字上有交互，对于开发者来说，都比较难处理。
 
 我们调研了很久，觉得字体是个很好的办法，但是汉字的全集很大，我们的办法是挑选使用频率很高的 500 个字作为子集，经过实验，500 个字的思源黑体大小是 72K，并不大。将在子集中的文字转成我们子集的 Unicode 编码，和系统字符的默认 Unicode 不一样，同时加密方法不会暴露在 JS 代码中，极大的提高了安全性。
-
-`fontkit` 提供了两个方法
-
-- `genSubsetFont` - 根据原字体和原文字集和 codePointStart 重新生成一个字体文件，并输出他们之间的关系
-- `convert` - 根据映射表把字符串转为『加密』后的字符串
 
 为了规避法律风险，建议用免费开源的思源字体，https://github.com/adobe-fonts/source-han-sans
 
@@ -16,6 +11,17 @@
 ![替换前和替换后的对比](./test/compare.png)
 
 上面完全是苹果默认字体 `PingFangSC-Regular`，下面是替换了常用 500 个汉字的 `PingFangSC-Regular` 和 `Source-Han-Sans` 的混合版本，单看下面的版本，并不能看出明显的差别。
+
+`fontsub` 提供了两个方法
+
+- `genSubsetFont` - 根据原字体和原文字集和 codePointStart 重新生成一个字体文件，并输出他们之间的关系
+- `convert` - 根据映射表把字符串转为『加密』后的字符串
+
+## 安装
+
+```
+$ npm install --save fontsub
+```
 
 ## genSubsetFont
 

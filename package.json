@@ -1,5 +1,5 @@
 {
-  "name": "fontsubset",
+  "name": "fontsub",
   "version": "0.0.1",
   "description": "import font file and export .ttf ",
   "main": "dist/index.js",
@@ -12,6 +12,7 @@
     "url": "https://github.com/PengXing/fontsubset.git"
   },
   "keywords": [
+    "fontsub",
     "font",
     "subset",
     "fontkit"
