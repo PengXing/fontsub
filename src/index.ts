@@ -1,18 +1,22 @@
 import fs = require('fs')
 import path = require('path')
 const Font = require('fonteditor-core').Font
+const woff2 = require('fonteditor-core').woff2
 
+type OutputType = 'ttf' | 'woff' | 'woff2' | 'eot' | 'svg'
 interface Options {
   source: string
   fontpath: string
-  codePointStart: number
+  codePointStart?: number
+  outputTypes?: OutputType | Array<OutputType>
 }
 interface Res {
   map: {
     [key: string]: number
   }
-  base64: string
-  buffer: Buffer
+  output: {
+    [key: string]: Buffer
+  }
 }
 
 /**
@@ -21,11 +25,21 @@ interface Res {
  * @param {Options} opts Options
  * @param {string} opts.source 需要转换的文字集
  * @param {string} opts.fontpath 字体文件
- * @param {number} opts.codePointStart 字体子集的起始位置
+ * @param {number?} opts.codePointStart 字体子集的起始位置
+ * @param {string|OutputType[]} opts.outputTypes 输出的字体文件的格式
  * @returns {Res}
  */
 export async function genSubsetFont(opts: Options): Promise<Res> {
-  const { source, fontpath, codePointStart } = opts
+  const { source, fontpath, codePointStart = 58000 } = opts
+  let outputTypes: OutputType[]
+  if (!opts.outputTypes) {
+    outputTypes = ['ttf']
+  }
+  if (typeof opts.outputTypes === 'string') {
+    outputTypes = [opts.outputTypes]
+  } else {
+    outputTypes = opts.outputTypes
+  }
 
   const codeMap = {}
   for (let i = 0; i < source.length; i++) {
@@ -53,12 +67,17 @@ export async function genSubsetFont(opts: Options): Promise<Res> {
     glyf.unicode = [unicode]
     map[String.fromCharCode(sourceUnicode)] = unicode
   }
+  console.log(outputTypes)
 
-  return {
-    map,
-    base64: font.toBase64({ type: 'ttf' }),
-    buffer: font.write({ type: 'ttf' }),
+  const output = {}
+  for (let type of outputTypes) {
+    if (type === 'woff2') {
+      await woff2.init()
+    }
+    output[type] = font.write({ type })
   }
+
+  return { map, output }
 }
 
 /**
