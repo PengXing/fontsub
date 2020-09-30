@@ -56,18 +56,19 @@ export async function genSubsetFont(opts: Options): Promise<Res> {
     type: path.extname(fontpath).replace('.', ''),
     subset: unicodeSet,
   })
-  const fonts = font.find({
-    unicode: unicodeSet,
-  })
   const map = {}
-  for (let i = 0; i < fonts.length; i++) {
-    const glyf = fonts[i]
+  // 保证传进来的字符的编码顺序
+  for (let i = 0; i < unicodeSet.length; i++) {
+    const fonts = font.find({
+      unicode: [unicodeSet[i]],
+    })
+
+    const glyf = fonts[0]
     const sourceUnicode = glyf.unicode[0]
     const unicode = codePointStart + i
     glyf.unicode = [unicode]
     map[String.fromCharCode(sourceUnicode)] = unicode
   }
-  console.log(outputTypes)
 
   const output = {}
   for (let type of outputTypes) {
