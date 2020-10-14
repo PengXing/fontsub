@@ -41,40 +41,39 @@ export async function genSubsetFont(opts: Options): Promise<Res> {
     outputTypes = opts.outputTypes
   }
 
-  const codeMap = {}
+  // 兼容 woff2 的解析
+  await woff2.init()
+
+  const unicodeSet = new Set()
   for (let i = 0; i < source.length; i++) {
-    const s = source[i]
-    if (codeMap[s]) {
+    const c = source.charCodeAt(i)
+    if (unicodeSet.has(c)) {
       continue
     }
-    codeMap[s] = source.charCodeAt(i)
+    unicodeSet.add(c)
   }
 
-  const unicodeSet = Object.values(codeMap)
   const sourceBuffer = await fs.promises.readFile(fontpath)
   const font = Font.create(sourceBuffer, {
     type: path.extname(fontpath).replace('.', ''),
-    subset: unicodeSet,
+    subset: Array.from(unicodeSet),
   })
   const map = {}
   // 保证传进来的字符的编码顺序
-  for (let i = 0; i < unicodeSet.length; i++) {
-    const fonts = font.find({
-      unicode: [unicodeSet[i]],
-    })
+  let i = 0
+  for (let code of unicodeSet) {
+    const fonts = font.find({ unicode: [code] })
 
     const glyf = fonts[0]
     const sourceUnicode = glyf.unicode[0]
     const unicode = codePointStart + i
     glyf.unicode = [unicode]
     map[String.fromCharCode(sourceUnicode)] = unicode
+    i++
   }
 
   const output = {}
   for (let type of outputTypes) {
-    if (type === 'woff2') {
-      await woff2.init()
-    }
     output[type] = font.write({ type })
   }
 
